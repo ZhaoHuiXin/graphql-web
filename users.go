@@ -15,6 +15,10 @@ type LoginByGraphql struct{
 	ID int32
 	Password string
 }
+type UserArg struct{
+	ID int32
+	Name string
+}
 
 var users = []User{
 	{
