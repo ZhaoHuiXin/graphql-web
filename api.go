@@ -16,6 +16,7 @@ func (r *Resolver) GetUser(ctx context.Context, args struct{Input *UserArg}) (*U
 	}
 
 	res := UserResolver{
+		app: r.app,
 		m: *user,
 	}
 	return &res, nil

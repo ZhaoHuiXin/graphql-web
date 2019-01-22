@@ -4,7 +4,6 @@ import (
 	"flag"
 	log "github.com/Sirupsen/logrus"
 	"github.com/jinzhu/gorm"
-	"net/http"
 	"os"
 	"time"
 
@@ -16,7 +15,6 @@ type App struct{
 	dbDsn string
 	redDsn string
 	db *gorm.DB
-	mux *http.ServeMux
 	redis *redis.Pool
 }
 
@@ -43,7 +41,6 @@ func init(){
 
 func NewApp() *App{
 	return &App{
-		mux: http.NewServeMux(),
 	}
 }
 

@@ -33,6 +33,46 @@ func GenerateToken(user User) (string, error) {
 	return tokenString, nil
 }
 
+func ValidateJWT(t string) (*jwt.Token, error) {
+	if t == "" {
+		return nil, errors.New("Authorization token must be present")
+	}
+	token, err := jwt.Parse(t, func(token *jwt.Token) (interface{}, error) {
+		// dont't forget to validate the alg is want you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return jwtSecret, nil
+	})
+	if err == nil && token.Valid{
+		return token, nil
+	}else{
+		return nil, errors.New("Invalid authorization token")
+	}
+}
+
+func authToken(h http.Handler) http.Handler{
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
+		ctx := r.Context()
+		token := r.Header.Get("token")
+		jwtToken, err := ValidateJWT(token)
+		if err != nil{
+			log.Println(err)
+			data := make(map[string]interface{})
+			data["msg"] = "token error"
+			responseJSON, err := json.Marshal(data)
+			if err != nil{
+				log.Println(err)
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(responseJSON)
+			return
+		}
+		h.ServeHTTP(w, r.WithContext(context.WithValue(ctx, "jwt", jwtToken)))
+	})
+}
+
+
 func CreateTokenEndpoint(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST"{
 		mail := r.FormValue("mail")
@@ -74,43 +114,4 @@ func CreateTokenEndpoint(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{ "error": "request method no allowed" }`))
 		return
 	}
-}
-
-func ValidateJWT(t string) (*jwt.Token, error) {
-	if t == "" {
-		return nil, errors.New("Authorization token must be present")
-	}
-	token, err := jwt.Parse(t, func(token *jwt.Token) (interface{}, error) {
-		// dont't forget to validate the alg is want you expect:
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
-		return jwtSecret, nil
-	})
-	if err == nil && token.Valid{
-		return token, nil
-	}else{
-		return nil, errors.New("Invalid authorization token")
-	}
-}
-
-func authToken(h http.Handler) http.Handler{
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
-		ctx := r.Context()
-		token := r.Header.Get("token")
-		jwtToken, err := ValidateJWT(token)
-		if err != nil{
-			log.Println(err)
-			data := make(map[string]interface{})
-			data["msg"] = "token error"
-			responseJSON, err := json.Marshal(data)
-			if err != nil{
-				log.Println(err)
-			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(responseJSON)
-			return
-		}
-		h.ServeHTTP(w, r.WithContext(context.WithValue(ctx, "jwt", jwtToken)))
-	})
 }

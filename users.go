@@ -57,6 +57,7 @@ func (p *App) getUser(ctx context.Context, id int32) (*User, error){
 }
 
 type UserResolver struct{
+	app *App
 	m User
 }
 
