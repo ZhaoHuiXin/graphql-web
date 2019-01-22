@@ -11,7 +11,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-type Wand struct{
+type App struct{
 	debug bool
 	dbDsn string
 	redDsn string
@@ -20,7 +20,7 @@ type Wand struct{
 	redis *redis.Pool
 }
 
-var DefaultWand *Wand = NewWand()
+var DefaultApp *App = NewApp()
 
 func init(){
 	dbName := os.Getenv("DBNAME")
@@ -32,22 +32,22 @@ func init(){
 	if mysqlUrl == ""{
 		mysqlUrl = "mysql://user:password@(host:port)/" + dbName
 	}
-	flag.StringVar(&DefaultWand.dbDsn, "mysql", mysqlUrl, "usage: mysql uri")
+	flag.StringVar(&DefaultApp.dbDsn, "mysql", mysqlUrl, "usage: mysql uri")
 
 	redisUrl := os.Getenv("REDIS_URL")
 	if redisUrl == ""{
 		redisUrl = "redis://localhost:6379/0"
 	}
-	flag.StringVar(&DefaultWand.redDsn, "redis", redisUrl, "usage: redis uri")
+	flag.StringVar(&DefaultApp.redDsn, "redis", redisUrl, "usage: redis uri")
 }
 
-func NewWand() *Wand{
-	return &Wand{
+func NewApp() *App{
+	return &App{
 		mux: http.NewServeMux(),
 	}
 }
 
-func (p *Wand) Init(debug bool){
+func (p *App) Init(debug bool){
 	p.debug = debug
 	err := p.OpenDB()
 	if err != nil{
@@ -56,7 +56,7 @@ func (p *Wand) Init(debug bool){
 	p.OpenRedisPool()
 }
 
-func (p *Wand) OpenRedisPool() {
+func (p *App) OpenRedisPool() {
 	p.redis = &redis.Pool{
 		MaxIdle:     3,
 		IdleTimeout: 180 * time.Second,
@@ -66,6 +66,6 @@ func (p *Wand) OpenRedisPool() {
 	}
 }
 
-func (p *Wand) Redis() redis.Conn {
+func (p *App) Redis() redis.Conn {
 	return p.redis.Get()
 }

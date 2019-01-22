@@ -4,6 +4,7 @@ schema {
 }
 
 type Query{
+    getUser(input: UserArg!):User
     hello: String!
 }
 
@@ -11,3 +12,13 @@ type Mutation{
 
 }
 
+input UserArg{
+    ID:Int!
+}
+
+type User{
+    id:Int
+    name:String
+    mail:String
+    password:String!
+}

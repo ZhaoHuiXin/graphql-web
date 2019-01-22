@@ -1,6 +1,6 @@
 package main
 
-import(
+import (
 	"context"
 )
 
@@ -35,7 +35,7 @@ var users = []User{
 	},
 }
 
-func (p *Wand) GnerateFakeData() (err error){
+func (p *App) GnerateFakeData() (err error){
 	p.db.DropTableIfExists(&User{})
 	p.db.CreateTable(&User{})
 	for _, u := range users{
@@ -46,7 +46,7 @@ func (p *Wand) GnerateFakeData() (err error){
 	return nil
 }
 
-func (p *Wand) getUser(ctx context.Context, id int32) (*User, error){
+func (p *App) getUser(ctx context.Context, id int32) (*User, error){
 	var user User
 	err := p.db.First(&user, id).Error
 	if err != nil{
@@ -54,4 +54,24 @@ func (p *Wand) getUser(ctx context.Context, id int32) (*User, error){
 	}
 
 	return &user, nil
+}
+
+type UserResolver struct{
+	m User
+}
+
+func (u *UserResolver) ID(ctx context.Context) *int32{
+	return &u.m.ID
+}
+
+func (u *UserResolver) Name(ctx context.Context) *string{
+	return &u.m.Name
+}
+
+func (u *UserResolver) Mail(ctx context.Context) *string{
+	return &u.m.Mail
+}
+
+func (u *UserResolver) Password(ctx context.Context) string{
+	return *&u.m.Password
 }

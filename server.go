@@ -12,16 +12,17 @@ import (
 var graphqlHandler, graphqlLoginHandler *relay.Handler
 
 type Resolver struct {
-	wand *Wand
+	wand *App
 }
 
 func init(){
-	DefaultWand.Init(true)
+	DefaultApp.Init(true)
 	s, err := getSchema("./graphql-files/schema.graphql")
 	if err != nil{
 		log.WithFields(log.Fields{"time": time.Now()}).Info(err)
 	}
-	schema := graphql.MustParseSchema(s, &Resolver{}, graphql.UseStringDescriptions())
+	schema := graphql.MustParseSchema(s, &Resolver{wand: DefaultApp}, graphql.UseStringDescriptions())
+
 	sLogin, err := getSchema("./graphql-files/login.graphql")
 	if err != nil{
 		log.WithFields(log.Fields{"time": time.Now()}).Info(err)
@@ -29,7 +30,7 @@ func init(){
 	schemaLogin := graphql.MustParseSchema(sLogin, &GraphqlLogin{}, graphql.UseStringDescriptions())
 	graphqlHandler = &relay.Handler{Schema: schema}
 	graphqlLoginHandler = &relay.Handler{Schema: schemaLogin}
-	err = DefaultWand.GnerateFakeData()
+	err = DefaultApp.GnerateFakeData()
 	if err != nil{
 		log.Println(err)
 	}

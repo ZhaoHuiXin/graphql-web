@@ -22,7 +22,7 @@ var jwtSecret []byte = []byte("thepolyglotdeveloper12312")
 
 func GenerateToken(user User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"exp": time.Now().Add(time.Second * time.Duration(10)).Unix(), //This token will live for 24 hours
+		"exp": time.Now().Add(time.Hour * time.Duration(24)).Unix(), //This token will live for 24 hours
 		"iat": time.Now().Unix(),
 		"sub": user.ID,
 	})

@@ -9,7 +9,7 @@ import (
 //	DB *gorm.DB
 //}
 
-func (p *Wand) OpenDB() (err error) {
+func (p *App) OpenDB() (err error) {
 	if p.db != nil {
 		return
 	}
