@@ -17,6 +17,8 @@ func (p *App) OpenDB() (err error) {
 	if err != nil{
 		return err
 	}
+	db.DB().SetMaxIdleConns(10)
+	db.DB().SetMaxOpenConns(100)
 	p.db = db
 	return nil
 }

@@ -6,9 +6,9 @@ import (
 
 type User struct {
 	ID int32	`gorm:"AUTO_INCREMENT;PRIMARY_KEY"`
-	Name string `gorm:"type:varchar(16)"`
-	Mail string	`gorm:"type:varchar(32)"`
-	Password string `gorm:"type:varchar(16)"`
+	Name string `gorm:"type:varchar(16);not null;default ''"`
+	Mail string	`gorm:"type:varchar(32);not null;default ''"`
+	Password string `gorm:"type:varchar(16);not null;default ''"`
 }
 
 type LoginByGraphql struct{

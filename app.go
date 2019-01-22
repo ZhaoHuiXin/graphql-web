@@ -2,12 +2,13 @@ package main
 
 import (
 	"flag"
-	log "github.com/Sirupsen/logrus"
-	"github.com/jinzhu/gorm"
+
 	"os"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
+	log "github.com/Sirupsen/logrus"
+	"github.com/jinzhu/gorm"
 )
 
 type App struct{

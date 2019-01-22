@@ -12,11 +12,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-//type User struct {
-//	Id       string `json:"id"`
-//	Username string `json:"username"`
-//	Password string `json:"password"`
-//}
 var TimeFunc = time.Now
 var jwtSecret []byte = []byte("thepolyglotdeveloper12312")
 
