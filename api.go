@@ -6,6 +6,22 @@ import (
 	"github.com/pkg/errors"
 )
 
+func (p *App) GnerateFakeData() (err error){
+	p.db.DropTableIfExists(&User{}, &Book{})
+	p.db.CreateTable(&User{}, &Book{})
+	for _, u := range users{
+		if err := p.db.Create(&u).Error; err != nil{
+			return err
+		}
+	}
+	for _,b := range books{
+		if err := p.db.Create(&b).Error; err != nil{
+			return err
+		}
+	}
+	return nil
+}
+
 func (_ *Resolver) Hello() string {
 	return "hello world"
 }
@@ -22,5 +38,6 @@ func (r *Resolver) GetUser(ctx context.Context, args struct{Input *UserArg}) (*U
 	}
 	return &res, nil
 }
+
 
 

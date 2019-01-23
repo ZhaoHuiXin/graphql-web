@@ -20,5 +20,11 @@ type User{
     id:Int
     name:String
     mail:String
-    password:String!
+    books: [Book]
+}
+
+type Book{
+    id:Int
+    title:String
+    author:String
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/pkg/errors"
 )
 
 type User struct {
@@ -9,6 +10,7 @@ type User struct {
 	Name string `gorm:"type:varchar(16);not null;default ''"`
 	Mail string	`gorm:"type:varchar(32);not null;default ''"`
 	Password string `gorm:"type:varchar(16);not null;default ''"`
+	Books []Book
 }
 
 type LoginByGraphql struct{
@@ -35,16 +37,7 @@ var users = []User{
 	},
 }
 
-func (p *App) GnerateFakeData() (err error){
-	p.db.DropTableIfExists(&User{})
-	p.db.CreateTable(&User{})
-	for _, u := range users{
-		if err := p.db.Create(&u).Error; err != nil{
-			return err
-		}
-	}
-	return nil
-}
+
 
 func (p *App) getUser(ctx context.Context, id int32) (*User, error){
 	var user User
@@ -56,12 +49,21 @@ func (p *App) getUser(ctx context.Context, id int32) (*User, error){
 	return &user, nil
 }
 
+func (p *App) GetUserBooks(ctx context.Context, id int32)([]Book, error){
+	var b []Book
+	err := p.db.Where("user_id = ?", id).Find(&b).Error
+	if err != nil{
+		return nil, err
+	}
+	return b, nil
+}
+
 type UserResolver struct{
 	app *App
 	m User
 }
 
-func (u *UserResolver) ID(ctx context.Context) *int32{
+func (u *UserResolver) Id(ctx context.Context) *int32{
 	return &u.m.ID
 }
 
@@ -74,5 +76,21 @@ func (u *UserResolver) Mail(ctx context.Context) *string{
 }
 
 func (u *UserResolver) Password(ctx context.Context) string{
-	return *&u.m.Password
+	return u.m.Password
+}
+
+func (u *UserResolver) Books(ctx context.Context) (*[]*BookResolver, error){
+	books, err := u.app.GetUserBooks(ctx, u.m.ID)
+	if err != nil{
+		return nil, errors.Wrap(err, "Books")
+	}
+
+	r := make([]*BookResolver, len(books))
+	for i := range books{
+		r[i] = &BookResolver{
+			app: u.app,
+			m: books[i],
+		}
+	}
+	return &r, nil
 }
