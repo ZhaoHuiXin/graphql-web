@@ -29,9 +29,9 @@ func init(){
 
 	mysqlUrl := os.Getenv("MYSQL_URL")
 	if mysqlUrl == ""{
-		mysqlUrl = "mysql://user:password@(host:port)/" + dbName
+		mysqlUrl = "user:password@/" + dbName
 	}
-	flag.StringVar(&DefaultApp.dbDsn, "mysql", mysqlUrl, "usage: mysql uri")
+	flag.StringVar(&DefaultApp.dbDsn, "mysql", mysqlUrl, "usage: user:password@/db")
 
 	redisUrl := os.Getenv("REDIS_URL")
 	if redisUrl == ""{
@@ -49,7 +49,7 @@ func (p *App) Init(debug bool){
 	p.debug = debug
 	err := p.OpenDB()
 	if err != nil{
-		log.WithField("func", "Wand Init").Info("OpenDB: ", err)
+		log.WithField("func", "App Init").Info("OpenDB: ", err)
 	}
 	p.OpenRedisPool()
 }

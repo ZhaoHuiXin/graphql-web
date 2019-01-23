@@ -1,6 +1,10 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+	"os"
+	"strconv"
 	"time"
 	"net/http"
 
@@ -11,12 +15,25 @@ import (
 //var schema, schemaLogin *graphql.Schema
 var graphqlHandler, graphqlLoginHandler *relay.Handler
 
-type Resolver struct {
-	app *App
+type Opt struct{
+	debug bool
+	listen string
 }
 
+var opt Opt
+
 func init(){
-	DefaultApp.Init(true)
+	debug := false
+	if os.Getenv("DEBUG") != ""{
+		debug, _ = strconv.ParseBool(os.Getenv("DEBUG"))
+	}
+	flag.BoolVar(&opt.debug, "debug", debug, "debug")
+	port, _ := strconv.ParseInt(os.Getenv("DEMO_PORT"), 10, 64)
+	if port < 1{
+		port = 8787
+	}
+	flag.StringVar(&opt.listen, "listen", fmt.Sprint(":", port), "usage :port")
+
 	s, err := getSchema("./graphql-files/schema.graphql")
 	if err != nil{
 		log.WithFields(log.Fields{"time": time.Now()}).Info(err)
@@ -30,18 +47,28 @@ func init(){
 	schemaLogin := graphql.MustParseSchema(sLogin, &GraphqlLogin{}, graphql.UseStringDescriptions())
 	graphqlHandler = &relay.Handler{Schema: schema}
 	graphqlLoginHandler = &relay.Handler{Schema: schemaLogin}
-	err = DefaultApp.GnerateFakeData()
-	if err != nil{
-		log.Println(err)
-	}
+
 }
 
 func main(){
-	http.Handle("/login/graphql", logged(graphqlLoginHandler))
-	http.Handle("/query", logged(authToken(graphqlHandler)))
-	http.HandleFunc("/login", CreateTokenEndpoint)
-	log.Fatal(http.ListenAndServe(":8787", nil))
+	flag.Parse()
+	DefaultApp.Init(true)
+	err := DefaultApp.GnerateFakeData()
+	if err != nil{
+		log.Println(err)
+	}
+	log.Printf("debug: %v", opt.debug)
+	log.Printf("listen port%v", opt.listen)
 
+	http.Handle("/login/graphql", logged(graphqlLoginHandler))
+	if DefaultApp.debug{
+		http.Handle("/query", logged(graphqlHandler))
+	}else{
+		http.Handle("/query", logged(authToken(graphqlHandler)))
+	}
+	http.HandleFunc("/login", CreateTokenEndpoint)
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+	log.Fatal(http.ListenAndServe(opt.listen, nil))
 }
 
 

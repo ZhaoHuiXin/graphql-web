@@ -22,6 +22,10 @@ func (p *App) GnerateFakeData() (err error){
 	return nil
 }
 
+type Resolver struct {
+	app *App
+}
+
 func (_ *Resolver) Hello() string {
 	return "hello world"
 }
