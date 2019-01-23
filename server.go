@@ -44,7 +44,7 @@ func init(){
 	if err != nil{
 		log.WithFields(log.Fields{"time": time.Now()}).Info(err)
 	}
-	schemaLogin := graphql.MustParseSchema(sLogin, &GraphqlLogin{}, graphql.UseStringDescriptions())
+	schemaLogin := graphql.MustParseSchema(sLogin, &GraphqlLogin{app: DefaultApp}, graphql.UseStringDescriptions())
 	graphqlHandler = &relay.Handler{Schema: schema}
 	graphqlLoginHandler = &relay.Handler{Schema: schemaLogin}
 

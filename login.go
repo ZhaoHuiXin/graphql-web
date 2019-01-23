@@ -4,24 +4,21 @@ import (
 )
 
 type GraphqlLogin struct {
+	app *App
 }
 
-func(_ *GraphqlLogin) Login(args *struct{
+func(p *GraphqlLogin) Login(args *struct{
 	Input *LoginByGraphql
 })(string, error){
-	for _, user := range users{
-		if user.ID == args.Input.ID{
-			if user.Password == args.Input.Password{
-				token, err := GenerateToken(user)
-				if err!= nil{
-					return "", errors.Wrap(err, "ERROR WHEN CREATE TOKEN")
-				}
-				return token, err
-			} else{
-				return "", errors.New("password is not correct")
-			}
-		}
+	var u User
+	err := p.app.db.Where("id = ? AND password = ?", args.Input.ID, args.Input.Password).Find(&u).Error
+	if err != nil{
+		return "", errors.Wrap(err, "no such user or password is incorrect.")
 	}
-	return "", errors.New("User not found.")
+	token, err := GenerateToken(u)
+	if err!= nil{
+		return "", errors.Wrap(err, "ERROR WHEN CREATE TOKEN")
+	}
+	return token, err
 }
 
