@@ -2,14 +2,10 @@ package main
 
 import (
 	"fmt"
-	"net/http"
-	"time"
-	"context"
-	"encoding/json"
-
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
-	log "github.com/Sirupsen/logrus"
+	"net/http"
+	"time"
 )
 
 var TimeFunc = time.Now
@@ -44,27 +40,6 @@ func ValidateJWT(t string) (*jwt.Token, error) {
 	}else{
 		return nil, errors.New("Invalid authorization token")
 	}
-}
-
-func authToken(h http.Handler) http.Handler{
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
-		ctx := r.Context()
-		token := r.Header.Get("token")
-		jwtToken, err := ValidateJWT(token)
-		if err != nil{
-			log.Println(err)
-			data := make(map[string]interface{})
-			data["msg"] = "token error"
-			responseJSON, err := json.Marshal(data)
-			if err != nil{
-				log.Println(err)
-			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(responseJSON)
-			return
-		}
-		h.ServeHTTP(w, r.WithContext(context.WithValue(ctx, "jwt", jwtToken)))
-	})
 }
 
 
