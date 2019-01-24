@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"time"
 )
 
 func (p *App) OpenDB() (err error) {
@@ -15,6 +16,7 @@ func (p *App) OpenDB() (err error) {
 	}
 	db.DB().SetMaxIdleConns(10)
 	db.DB().SetMaxOpenConns(100)
+	db.DB().SetConnMaxLifetime(time.Duration(6) * time.Hour)
 	p.db = db
 	return nil
 }
